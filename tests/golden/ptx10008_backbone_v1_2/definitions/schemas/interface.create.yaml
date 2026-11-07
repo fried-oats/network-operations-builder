@@ -1,0 +1,45 @@
+schema_id: interface.create
+version: 1.2.0
+defaults:
+  circuit_id: Direct
+  isis_enabled: false
+  isis_passive: false
+  mpls_enabled: false
+  ldp_enabled: false
+  rmon_enabled: false
+  cos_enabled: false
+fields:
+  os_family: {type: enum, choices: [Junos], required: true, group: Target}
+  os_version: {type: string, required: true, group: Target}
+  interface_type: {type: string, required: true, group: Target}
+  local_interface: {type: string, required: true, group: Link, capability: interface}
+  description: {type: string, derived: true, required: true, group: Link}
+  peer_name: {type: string, required: true, group: Link}
+  peer_interface: {type: string, required: true, group: Link}
+  circuit_id: {type: string, required: true, pattern: '(?:[0-9]{8}-[0-9]{4}|[0-9]{4}-[0-9]{4}-[0-9]{4}|Direct)', group: Link}
+  etc: {type: string, group: Link}
+  ipv4_address: {type: ip_interface, family: 4, group: Addresses}
+  ipv6_address: {type: ip_interface, family: 6, group: Addresses}
+  speed: {type: string, group: Physical, capability: speed}
+  mtu: {type: integer, min: 1, max: 65535, group: Physical, capability: mtu}
+  fec: {type: string, group: Physical, capability: fec}
+  ipv4_filter_input: {type: string, pattern: '[A-Za-z0-9_.:-]+', group: Filters, capability: ipv4_filter, requires: ipv4_address}
+  ipv4_filter_output: {type: string, pattern: '[A-Za-z0-9_.:-]+', group: Filters, capability: ipv4_filter, requires: ipv4_address}
+  ipv6_filter_input: {type: string, pattern: '[A-Za-z0-9_.:-]+', group: Filters, capability: ipv6_filter, requires: ipv6_address}
+  ipv6_filter_output: {type: string, pattern: '[A-Za-z0-9_.:-]+', group: Filters, capability: ipv6_filter, requires: ipv6_address}
+  isis_enabled: {type: bool, group: IS-IS, capability: isis}
+  isis_passive: {type: bool, group: IS-IS, visible_when: isis_enabled}
+  isis_level: {type: integer, choices: [1, 2], group: IS-IS, visible_when: isis_enabled}
+  isis_metric: {type: integer, min: 0, max: 16777215, group: IS-IS, visible_when: isis_enabled}
+  isis_hello_interval: {type: integer, min: 1, group: IS-IS, visible_when: isis_enabled}
+  isis_hold_time: {type: integer, min: 1, group: IS-IS, visible_when: isis_enabled}
+  mpls_enabled: {type: bool, group: MPLS, capability: mpls}
+  ldp_enabled: {type: bool, group: MPLS, capability: ldp, requires: mpls_enabled}
+  rmon_enabled: {type: bool, group: RMON, capability: rmon}
+  ifindex: {type: integer, min: 1, group: RMON, visible_when: rmon_enabled, required_when: rmon_enabled}
+  crc_alarm_id: {type: integer, derived: true, min: 1, group: RMON, visible_when: rmon_enabled, required_when: rmon_enabled}
+  qdrop_alarm_id: {type: integer, derived: true, min: 1, group: RMON, visible_when: rmon_enabled, required_when: rmon_enabled}
+  cos_enabled: {type: bool, group: CoS, capability: cos}
+  cos_mode: {type: enum, choices: [backbone, external], group: CoS, visible_when: cos_enabled}
+  scheduler_map: {type: string, group: CoS, visible_when: cos_enabled, capability: scheduler_map}
+  classifiers: {type: string, group: CoS, visible_when: cos_enabled, capability: classifiers}

@@ -1,0 +1,37 @@
+set interfaces et-1/0/0 description "## GL-PO239(et-1/0/0)-DO-GW203(et-0/0/1)`100GE`08882136-0607`NCP` NCP Wet HLS/KT-SEL/KTGE100L03`(NCP Backhaul:OQYX/167426//ZYO)`##"
+set interfaces et-1/0/0 speed 100g
+set interfaces et-1/0/0 mtu 4484
+set interfaces et-1/0/0 ether-options fec none
+set interfaces et-1/0/0 unit 0 family inet filter input Filter-POM-GATE-IN
+set interfaces et-1/0/0 unit 0 family inet filter output Filter-POM-GATE-OUT
+set interfaces et-1/0/0 unit 0 family inet address 112.174.87.46/30
+set interfaces et-1/0/0 unit 0 family iso
+set interfaces et-1/0/0 unit 0 family inet6 filter input Filter-POM-GATE-IN-IPv6
+set interfaces et-1/0/0 unit 0 family inet6 address 2400::100:112:174:87:2e/126
+set interfaces et-1/0/0 unit 0 family mpls
+
+set protocols isis interface et-1/0/0.0 ldp-synchronization
+set protocols isis interface et-1/0/0.0 level 2 metric 150
+set protocols isis interface et-1/0/0.0 level 2 ipv6-unicast-metric 150
+set protocols isis interface et-1/0/0.0 level 2 hello-interval 10
+set protocols isis interface et-1/0/0.0 level 2 hold-time 30
+set protocols isis interface et-1/0/0.0 point-to-point
+
+set protocols ldp interface et-1/0/0.0
+
+set protocols mpls interface et-1/0/0.0
+
+set snmp rmon alarm 8657 apply-groups QDrop-Rmon
+set snmp rmon alarm 8657 description et-1/0/0
+set snmp rmon alarm 8657 variable jnxCosQstatTotalDropPkts.657.0
+set snmp rmon alarm 8657 syslog-subtag QDROP_et_1_0_0
+
+set snmp rmon alarm 9657 apply-groups CRC-Rmon
+set snmp rmon alarm 9657 description et-1/0/0
+set snmp rmon alarm 9657 variable ifJnxInFrameErrors.657
+set snmp rmon alarm 9657 syslog-subtag CRC_et_1_0_0
+
+set class-of-service interfaces et-1/0/0 unit 0 rewrite-rules dscp-ipv6 OUT_ANY_IPv6_REMARK protocol mpls
+set class-of-service interfaces et-1/0/0 unit 0 rewrite-rules dscp-ipv6 OUT_ANY_IPv6_REMARK_temp
+set class-of-service interfaces et-1/0/0 unit 0 rewrite-rules exp OUT_ANY_EXP_REMARK
+set class-of-service interfaces et-1/0/0 unit 0 rewrite-rules inet-precedence OUT_ANY_IPv4_REMARK

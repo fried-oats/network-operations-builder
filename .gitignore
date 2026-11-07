@@ -1,0 +1,29 @@
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest_tmp*/
+.mypy_cache/
+.ruff_cache/
+
+# Test coverage reports
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Generated builds, releases, and delivered artifacts
+/build/
+/dist/
+/outputs/
+*.egg-info/
+/NetworkOperationsBuilder.spec
+
+# Temporary dependencies used by artifact authoring
+node_modules/
+
+# Local OS files
+.DS_Store
+Thumbs.db
+Desktop.ini

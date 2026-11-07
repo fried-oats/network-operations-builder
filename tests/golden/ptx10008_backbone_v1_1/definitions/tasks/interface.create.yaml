@@ -1,0 +1,5 @@
+task_id: interface.create
+version: 1.1.0
+name: Interface 연동 생성
+schema_id: interface.create
+template_id: junos.interface.create

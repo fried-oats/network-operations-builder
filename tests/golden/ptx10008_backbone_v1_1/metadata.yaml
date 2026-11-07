@@ -1,0 +1,15 @@
+approved_by: user-provided expected CLI and follow-up clarification in this chat
+model: PTX10008
+os_version: 23.4R2-S1.6-EVO
+interface_type: et
+schema_version: 1.1.0
+profile_version: 1.1.0
+template_version: 1.1.0
+notes:
+- Management IP was not supplied; 192.0.2.239 is a documentation-only test Inventory
+  key, not the real router management IP.
+- Description is supplied verbatim, not composed from peer fields.
+- Follow-up confirms speed 100g command; placed after description and before mtu.
+- Follow-up confirms QDrop=8000+ifIndex and CRC=9000+ifIndex. Rx Optics deferred.
+- External ae0 CoS is a separate fragment, not approval of ae interface creation.
+definitions_root: definitions

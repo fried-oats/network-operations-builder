@@ -1,0 +1,2 @@
+set class-of-service interfaces ae0 unit 0 classifiers dscp-ipv6 IN_ISP_IPv6
+set class-of-service interfaces ae0 unit 0 classifiers inet-precedence IN_ISP_IPv4

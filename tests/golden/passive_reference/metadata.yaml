@@ -1,0 +1,9 @@
+source: user-provided IS-IS passive CLI in this chat
+status: original_renderer_reference_context_confirmed
+model: PTX10008
+os_version: 23.4R2-S1.6-EVO
+interface: et-3/0/32
+notes:
+- Original supplied CLI retained unchanged for renderer regression.
+- User confirmed model/OS and keeping existing automatic Description/speed; production
+  variant is ptx10008_passive.
