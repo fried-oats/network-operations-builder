@@ -3,9 +3,9 @@ approved_by: User supplied passive CLI, confirmed model/OS and retained existing
 model: PTX10008
 os_version: 23.4R2-S1.6-EVO
 interface_type: et
-schema_version: 1.3.0
-profile_version: 1.3.0
-template_version: 1.3.0
+schema_version: 1.4.1
+profile_version: 1.4.1
+template_version: 1.4.1
 notes:
 - 192.0.2.240 is a test management IP, not the real router management address.
 - peer_interface et-0/0/1 is an illustrative input for the existing automatic Description

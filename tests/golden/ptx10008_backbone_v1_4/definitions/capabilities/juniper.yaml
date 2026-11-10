@@ -1,0 +1,22 @@
+rules:
+  # User-provided model fact only; this does not approve OS/interface scope.
+  - match: {manufacturer: Juniper, model: T4000}
+    features: {fec: unsupported}
+  - match: {manufacturer: Juniper, model: PTX10008}
+    features: {fec: unknown}
+  # Source: user-provided GL-PO239 input and expected config, 2026-11-04.
+  - match: {manufacturer: Juniper, model: PTX10008, os_family: Junos, os_version: 23.4R2-S1.6-EVO, interface_type: et}
+    features:
+      interface: supported
+      speed: {status: supported, values: [100g]}
+      mtu: {status: supported, values: [4484]}
+      fec: {status: supported, values: [none]}
+      ipv4_filter: supported
+      ipv6_filter: supported
+      isis: supported
+      # User-confirmed LA-POP239 model/OS and passive CLI, 2026-11-07.
+      isis_passive: supported
+      mpls: supported
+      ldp: supported
+      rmon: supported
+      cos: supported

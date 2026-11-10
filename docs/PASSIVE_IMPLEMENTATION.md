@@ -1,4 +1,4 @@
-# IS-IS passive 구현 (정의 1.3.0)
+# IS-IS passive 구현 (정의 1.4.1)
 
 ## 구현한 정책
 
@@ -10,12 +10,12 @@ IS-IS Enabled + Passive가 모두 활성일 때 다음 값을 엔진에서 강�
 | family iso | 생성 | 생략 |
 | family mpls, protocols mpls | MPLS 선택에 따름 | 생략 |
 | protocols ldp, LDP sync | LDP 선택에 따름 | 생략 |
-| ether-options no-flow-control | 생략 | 생성 |
+| ether-options no-flow-control | link_mode=external일 때 생성 | link_mode=external일 때 생성 |
 | IS-IS 명령 | point-to-point, hello/hold | level 2 passive |
 | RMON / CoS | 선택에 따름 | 선택에 따름 |
 
 metric 하나를 IPv4/IPv6 공통값으로 사용하므로 두 출력 metric 모두 0이다.
-CoS는 별도 선택으로 유지하며, external 선택 시 기존 IN_ISP classifiers를 생성한다.
+Link 그룹의 link_mode는 별도 선택으로 유지하며, external 선택 시 기존 IN_ISP classifiers를 생성한다.
 passive 활성 시 metric/MPLS/LDP 입력과 hello/hold 입력을 비활성화한다.
 원시 입력은 보존하므로 passive 해제 시 이전 값이 복원된다.
 자동 적용값의 출처는 rule:isis_passive로 기록한다. Profile 고정값과 충돌하면 출력 차단한다.
@@ -34,3 +34,5 @@ passive 활성 시 metric/MPLS/LDP 입력과 hello/hold 입력을 비활성화�
 전체 엔진 Golden에만 사용자 확인에 따른 자동 Description 및 speed 명령을 반영했다.
 예제에서 제공되지 않은 관리 IP/peer port는 테스트용 값임을 metadata와 예제 안내에 명시했다.
 Single/CSV/XLSX의 동일 출력, 미확인 모델·OS 차단, IPv4/IPv6 선택, GUI 값 복원을 검증한다.
+
+1.4.1부터 no-flow-control 조건은 passive에서 분리되었습니다. Link external이면 생성하고 backbone이면 생략합니다.

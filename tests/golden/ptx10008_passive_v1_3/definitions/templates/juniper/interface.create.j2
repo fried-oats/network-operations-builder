@@ -1,0 +1,3 @@
+{% for change in changes %}{% if not loop.first and change.group != loop.previtem.group %}
+{% endif %}{{ change.operation }} {{ change.target }} {{ change.property }}{% if change.value is not none %} {% if change.quoted %}"{{ change.value }}"{% else %}{{ change.value }}{% endif %}{% endif %}
+{% endfor %}

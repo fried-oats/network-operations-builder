@@ -6,26 +6,15 @@ import pytest
 from openpyxl import load_workbook
 from app.bulk.io import BulkIO, export_report
 from app.domain import Diagnostic, Project
-from app.inventory import CsvInventoryRepository
+from app.inventory.normalization import inventory_record
+from app.inventory.api_repository import API_INVENTORY_SOURCE
 from app.persistence.project import load_project, save_project
 
 
-def write_inventory(path, ips):
-    with path.open("w", encoding="utf-8-sig", newline="") as stream:
-        writer = csv.writer(stream)
-        writer.writerow(CsvInventoryRepository.headers)
-        for ip in ips:
-            writer.writerow([ip, "Router", "Core", "G", "Seoul", "NOC", "Juniper Networks", "ptx10008"])
-
-
-def test_inventory_canonical_and_transactional(tmp_path):
-    path = tmp_path / "inventory.csv"
-    write_inventory(path, [" 2001:db8::1 "])
-    record = CsvInventoryRepository().load(path)["2001:db8::1"]
+def test_inventory_canonical_normalization():
+    record = inventory_record(" 2001:db8::1 ", "Router", "Core", "G", "Seoul", "NOC", "Juniper Networks", "ptx10008")
     assert record.manufacturer == "Juniper" and record.model == "PTX10008"
-    write_inventory(path, ["2001:db8::1", "2001:0db8::1"])
-    with pytest.raises(ValueError, match="중복"):
-        CsvInventoryRepository().load(path)
+    assert record.management_ip == "2001:db8::1"
 
 
 @pytest.mark.parametrize("suffix", ["csv", "xlsx"])
@@ -70,9 +59,9 @@ def test_xlsx_formulas_rejected(tmp_path, registry, sheet, cell):
 
 def test_project_roundtrip_and_strict_version(tmp_path, instance):
     path = tmp_path / "project.nobproj"
-    project = Project(instances=[instance], common_overrides={"mtu": 9000}, inventory_source=str(tmp_path / "inventory.csv"))
+    project = Project(instances=[instance], common_overrides={"mtu": 9000})
     save_project(path, project)
-    assert json.loads(path.read_text(encoding="utf-8"))["inventory_source"] == "inventory.csv"
+    assert json.loads(path.read_text(encoding="utf-8"))["inventory_source"] == API_INVENTORY_SOURCE
     assert load_project(path) == project
     data = json.loads(path.read_text(encoding="utf-8"))
     data["tool_versions"]["schema"] = "0"

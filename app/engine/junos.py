@@ -52,7 +52,10 @@ def lower(instance, p, profile):
     if p.get("speed"):
         add("interface", physical, "speed", p["speed"])
     add("interface", physical, "mtu", p["mtu"])
-    if passive_active(p):
+    # Current policy is link-wide; archived Golden profiles retain their historical passive-only policy.
+    flow_modes = profile.rules.get("no_flow_control_link_modes")
+    no_flow_control = p.get("link_mode") in flow_modes if flow_modes is not None else passive_active(p)
+    if no_flow_control:
         add("interface", physical + " ether-options", "no-flow-control")
     add("interface", physical + " ether-options", "fec", p["fec"])
     for direction in ("input", "output"):
@@ -108,7 +111,9 @@ def lower_cos(instance, p, profile):
     """Also models the supplied ae0 external CoS fragment, without approving ae base config."""
     target = f"class-of-service interfaces {p['local_interface']} unit 0"
     changes = []
-    if p["cos_mode"] == "backbone":
+    # Archived Golden definitions retain their original field; the current schema accepts link_mode only.
+    mode = p["link_mode"] if "link_mode" in p else p["cos_mode"]
+    if mode == "backbone":
         entries = [(f"rewrite-rules {family}", name + (f" protocol {protocol}" if protocol else ""))
                    for family, name, protocol in profile.rules["backbone_rewrites"]]
     else:

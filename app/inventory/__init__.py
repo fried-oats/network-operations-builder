@@ -1,1 +1,1 @@
-from .csv_repository import CsvInventoryRepository
+from .api_repository import ApiInventoryRepository

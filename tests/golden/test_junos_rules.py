@@ -119,7 +119,7 @@ def test_actual_golden_single_equals_bulk(tmp_path, golden, suffix):
 
 def test_external_cos_fragment(registry):
     instance = TaskInstance("COS-REF", target_management_ip="192.0.2.239")
-    p = {"local_interface": "ae0", "cos_mode": "external"}
+    p = {"local_interface": "ae0", "link_mode": "external"}
     changes = lower_cos(instance, p, registry.profiles["hub-gate"])
     actual = "".join(f"{c.operation} {c.target} {c.property} {c.value}\n" for c in changes)
     assert actual == (ROOT / "cos_external/reference.set").read_text(encoding="utf-8")
@@ -127,7 +127,9 @@ def test_external_cos_fragment(registry):
 
 def test_shipped_project_reproduces_golden():
     service = BuilderService()
-    assert service.open_project(ROOT.parents[1] / "examples/ptx10008_golden.nobproj") is None
+    assert "API" in service.open_project(ROOT.parents[1] / "examples/ptx10008_golden.nobproj")
+    data = json.loads((ROOT / "ptx10008_backbone/input.json").read_text(encoding="utf-8"))
+    service.apply_api_inventory({r["management_ip"]: InventoryRecord(**r) for r in data["inventory"]})
     result = service.generate()
     assert not result.diagnostics
     assert result.outputs["task.clean"] == (ROOT / "ptx10008_backbone/expected.set").read_text(encoding="utf-8")

@@ -53,7 +53,7 @@ def test_profile_lock_and_constraints(synthetic_registry, instance, inventory):
     ("ipv4_address", "192.0.2.1", "parse"), ("peer_name", "a\nset bad", "parse"),
     ("isis_enabled", "maybe", "parse"), ("isis_level", 3, "choice"),
     ("ldp_enabled", True, "dependency"), ("ipv6_filter_input", "filter", "dependency"),
-    ("rmon_enabled", True, "required"), ("cos_mode", "unknown-policy", "choice"),
+    ("rmon_enabled", True, "required"), ("link_mode", "unknown-policy", "choice"),
     ("unexpected", "value", "unknown_field"),
 ])
 def test_invalid_parameters(synthetic_registry, instance, inventory, key, value, code):

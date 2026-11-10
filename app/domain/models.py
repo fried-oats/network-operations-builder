@@ -15,7 +15,7 @@ class TaskDefinition:
 class TaskInstance:
     instance_id: str
     task_id: str = "interface.create"
-    task_version: str = "1.3.0"
+    task_version: str = "1.4.1"
     target_management_ip: str = ""
     profile_id: str = "hub-gate"
     overrides: dict[str, Any] = field(default_factory=dict)
@@ -119,8 +119,8 @@ class GenerationResult:
 class Project:
     project_format_version: str = "1.0"
     name: str = "새 프로젝트"
-    inventory_source: str = ""
+    inventory_source: str = "api:/router/"
     common_overrides: dict[str, Any] = field(default_factory=dict)
     instances: list[TaskInstance] = field(default_factory=list)
     tool_versions: dict[str, str] = field(default_factory=lambda: {
-        "task": "1.3.0", "schema": "1.3.0", "profile": "1.3.0", "template": "1.3.0"})
+        "task": "1.4.1", "schema": "1.4.1", "profile": "1.4.1", "template": "1.4.1"})

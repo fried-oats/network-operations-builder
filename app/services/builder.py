@@ -4,7 +4,7 @@ from app.bulk.io import BulkIO
 from app.domain import Project
 from app.engine.core import ConfigEngine
 from app.engine.registry import Registry
-from app.inventory import CsvInventoryRepository
+from app.inventory.api_repository import API_INVENTORY_SOURCE, fetch_api_inventory
 from app.persistence.project import load_project, save_project
 
 
@@ -17,18 +17,24 @@ class BuilderService:
         self.inventory = {}
         self.result = None
 
-    def load_inventory(self, path):
-        records = CsvInventoryRepository().load(path)
-        self.inventory = records
-        self.project.inventory_source = str(Path(path).resolve())
-        self.result = None
-
     def generate(self):
         self.result = self.engine.generate(self.project.instances, self.inventory, self.project.common_overrides)
         rows = {id(instance): number for number, instance in enumerate(self.project.instances, 2)}
         by_iid = {i.instance_id: rows[id(i)] for i in self.project.instances}
         self.result.diagnostics = [replace(d, row=by_iid.get(d.instance_id)) for d in self.result.diagnostics]
         return self.result
+
+    def fetch_api_inventory(self, settings, user_id="", password=""):
+        return fetch_api_inventory(settings, user_id, password)
+
+    def apply_api_inventory(self, records):
+        self.inventory = records
+        self.project.inventory_source = API_INVENTORY_SOURCE
+        self.result = None
+
+    def load_api_inventory(self, settings, user_id="", password=""):
+        records = self.fetch_api_inventory(settings, user_id, password)
+        self.apply_api_inventory(records)
 
     def import_bulk(self, path):
         instances, common = self.bulk.load(path)
@@ -41,11 +47,13 @@ class BuilderService:
         project = load_project(path)
         records = {}
         warning = None
-        if project.inventory_source:
-            try:
-                records = CsvInventoryRepository().load(project.inventory_source)
-            except (OSError, ValueError) as exc:
-                warning = f"Inventory를 다시 로드하세요: {exc}"
+        if project.inventory_source not in {"", API_INVENTORY_SOURCE}:
+            warning = "기존 CSV Inventory 참조를 API로 전환했습니다. 파일 → API Inventory 불러오기로 라우터 목록을 불러오세요. Task/공통값은 유지했습니다."
+        else:
+            warning = "파일 → API Inventory 불러오기로 라우터 목록을 다시 불러오세요. Task/공통값은 유지했습니다."
+        if not project.instances:
+            warning = None
+        project.inventory_source = API_INVENTORY_SOURCE
         self.project, self.inventory, self.result = project, records, None
         return warning
 

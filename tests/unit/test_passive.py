@@ -20,7 +20,7 @@ def test_user_passive_cli_reference(registry):
         "ipv6_filter_input": "Filter-DDOS-Protect-IN_v6",
         "isis_enabled": True, "isis_passive": True, "isis_level": 2, "isis_metric": 1000,
         "isis_hello_interval": 10, "isis_hold_time": 30, "mpls_enabled": True, "ldp_enabled": True,
-        "rmon_enabled": True, "ifindex": 761, "cos_enabled": True, "cos_mode": "external",
+        "rmon_enabled": True, "ifindex": 761, "cos_enabled": True, "link_mode": "external",
     }
     profile = registry.profiles["hub-gate"]
     sources = {key: "override" for key in values}

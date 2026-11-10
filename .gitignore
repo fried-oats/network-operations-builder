@@ -27,3 +27,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Local API connection settings (keep the public example)
+/config/.env
+/config/.env.*
+!/config/.env.example

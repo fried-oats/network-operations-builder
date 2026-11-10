@@ -1,5 +1,5 @@
 schema_id: interface.create
-version: 1.3.0
+version: 1.4.1
 defaults:
   circuit_id: Direct
   isis_enabled: false
@@ -12,6 +12,7 @@ fields:
   os_family: {type: enum, choices: [Junos], required: true, group: Target}
   os_version: {type: string, required: true, group: Target}
   interface_type: {type: string, required: true, group: Target}
+  link_mode: {type: enum, choices: [backbone, external], required: true, group: Link}
   local_interface: {type: string, required: true, group: Link, capability: interface}
   description: {type: string, derived: true, required: true, group: Link}
   peer_name: {type: string, required: true, group: Link}
@@ -40,6 +41,5 @@ fields:
   crc_alarm_id: {type: integer, derived: true, min: 1, group: RMON, visible_when: rmon_enabled, required_when: rmon_enabled}
   qdrop_alarm_id: {type: integer, derived: true, min: 1, group: RMON, visible_when: rmon_enabled, required_when: rmon_enabled}
   cos_enabled: {type: bool, group: CoS, capability: cos}
-  cos_mode: {type: enum, choices: [backbone, external], group: CoS, visible_when: cos_enabled}
   scheduler_map: {type: string, group: CoS, visible_when: cos_enabled, capability: scheduler_map}
   classifiers: {type: string, group: CoS, visible_when: cos_enabled, capability: classifiers}

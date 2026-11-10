@@ -1,0 +1,18 @@
+approved_by: User supplied passive CLI, confirmed model/OS and retained existing automatic
+  Description/speed policy on 2026-11-07
+model: PTX10008
+os_version: 23.4R2-S1.6-EVO
+interface_type: et
+schema_version: 1.3.0
+profile_version: 1.3.0
+template_version: 1.3.0
+notes:
+- 192.0.2.240 is a test management IP, not the real router management address.
+- peer_interface et-0/0/1 is an illustrative input for the existing automatic Description
+  format, not a supplied carrier port.
+- 'Description and speed differ from original reference per explicit follow-up: keep
+  existing composition and speed CLI.'
+- Metric/MPLS/LDP overrides intentionally conflict with passive policy to verify forced
+  resolved values.
+- IPv6 spelling and all passive/RMON/CoS commands match the supplied reference.
+definitions_root: definitions

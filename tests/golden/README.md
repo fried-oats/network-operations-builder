@@ -29,3 +29,13 @@ ptx10008_backbone / ptx10008_external은 새 출력이며, ptx10008_backbone_v1_
 ptx10008_passive는 사용자 확인 모델/OS, 기존 Description/speed 유지 방침을 반영한 전체 Golden입니다.
 passive_reference는 최초 수신 CLI 원문을 독립적으로 보존합니다.
 현재 및 1.2.0/1.1.0 Golden 스냅샷을 모두 회귀 비교합니다.
+
+## 1.4.0 Link mode
+
+현재 Golden 입력은 cos_mode 대신 link_mode를 사용하며 CLI 기대 결과는 변경하지 않았습니다.
+1.3.0 입력/정의/기대 결과 스냅샷도 보존해 회귀 검증합니다.
+
+## 1.4.1 Link flow control
+
+현재 external Golden은 사용자 추가 CLI에 따라 no-flow-control을 FEC 앞에 포함합니다.
+backbone/passive Golden 출력은 각각의 link_mode 규칙에 맞춰 검증합니다. 1.4.0 정의/Golden도 보존합니다.

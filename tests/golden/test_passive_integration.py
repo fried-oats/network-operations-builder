@@ -109,12 +109,15 @@ def test_switch_back_to_p2p_keeps_raw_inputs(passive):
     assert "level 2 metric 1000" in text
     assert "family iso" in text and "family mpls" in text
     assert "ldp-synchronization" in text and "point-to-point" in text
-    assert "no-flow-control" not in text
+    # Link remains external when passive is disabled, so flow control policy remains unchanged.
+    assert "ether-options no-flow-control" in text
 
 
 def test_shipped_passive_project():
     service = BuilderService()
-    assert service.open_project(CASE.parents[2] / "examples/ptx10008_passive.nobproj") is None
+    assert "API" in service.open_project(CASE.parents[2] / "examples/ptx10008_passive.nobproj")
+    data = json.loads((CASE / "input.json").read_text(encoding="utf-8"))
+    service.apply_api_inventory({r["management_ip"]: InventoryRecord(**r) for r in data["inventory"]})
     result = service.generate()
     assert not result.diagnostics
     assert result.outputs["task.clean"] == (CASE / "expected.set").read_text(encoding="utf-8")

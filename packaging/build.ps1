@@ -1,6 +1,20 @@
+param([string]$OutputFolder = 'dist')
+
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
+if ($OutputFolder -notmatch '^dist(?:[\\/][A-Za-z0-9][A-Za-z0-9._-]*)?$') {
+    throw 'OutputFolder must be dist or a named subdirectory directly under dist'
+}
+$outputRoot = [System.IO.Path]::GetFullPath((Join-Path $projectRoot $OutputFolder))
+if (-not $outputRoot.StartsWith($projectRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+    throw 'Build output must be a subdirectory of the project workspace'
+}
+foreach ($target in @((Join-Path $projectRoot 'dist'), $outputRoot, (Join-Path $outputRoot 'NetworkOperationsBuilder'))) {
+    if ((Test-Path -LiteralPath $target) -and ((Get-Item -LiteralPath $target -Force).Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+        throw 'Build output cannot use a junction or symbolic link'
+    }
+}
 $pythonExe = Join-Path $projectRoot '.venv\Scripts\python.exe'
 & $pythonExe -m pytest -q --basetemp=.pytest_tmp_build
 if ($LASTEXITCODE -ne 0) { throw 'pytest failed; build cancelled' }
@@ -9,16 +23,19 @@ $pythonBase = & $pythonExe -c 'import sys; print(sys.base_prefix)'
 try {
     # Prevent unrelated native tools on PATH from supplying incompatible ICU/Qt DLLs.
     $env:PATH = "$projectRoot\.venv\Scripts;$pythonBase;$env:SystemRoot\System32;$env:SystemRoot"
-    & $pythonExe -m PyInstaller --noconfirm --clean --onedir --windowed --name NetworkOperationsBuilder --paths $projectRoot --add-data 'definitions;definitions' --exclude-module PySide6.QtWebEngineCore --exclude-module PySide6.QtWebEngineWidgets --exclude-module PySide6.QtWebEngineQuick --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick packaging/launcher.py
+    & $pythonExe -m PyInstaller --noconfirm --clean --onedir --windowed --distpath $outputRoot --name NetworkOperationsBuilder --paths $projectRoot --add-data 'definitions;definitions' --exclude-module PySide6.QtWebEngineCore --exclude-module PySide6.QtWebEngineWidgets --exclude-module PySide6.QtWebEngineQuick --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick packaging/launcher.py
 } finally {
     $env:PATH = $previousPath
 }
 if ($LASTEXITCODE -ne 0) { throw 'PyInstaller failed' }
-$standaloneFolder = Join-Path $projectRoot 'dist\NetworkOperationsBuilder'
+$standaloneFolder = Join-Path $outputRoot 'NetworkOperationsBuilder'
 Copy-Item -LiteralPath 'README.md' -Destination $standaloneFolder
 Copy-Item -LiteralPath 'docs' -Destination $standaloneFolder -Recurse
 Copy-Item -LiteralPath 'requirements-lock.txt' -Destination $standaloneFolder
 Copy-Item -LiteralPath 'examples' -Destination $standaloneFolder -Recurse
+$configFolder = Join-Path $standaloneFolder 'config'
+New-Item -ItemType Directory -Force $configFolder | Out-Null
+Copy-Item -LiteralPath 'config\.env.example' -Destination $configFolder
 & $pythonExe packaging/license_manifest.py $standaloneFolder
 if ($LASTEXITCODE -ne 0) { throw 'License collection failed' }
 $previousPlatform = $env:QT_QPA_PLATFORM

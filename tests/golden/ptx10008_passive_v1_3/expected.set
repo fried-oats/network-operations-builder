@@ -1,0 +1,26 @@
+set interfaces et-3/0/32 description "## LA-POP239(et-3/0/32)-[Uplink]T-Mobile_Sprint(AS1239)(et-0/0/1)`100g`08882137-1239``##"
+set interfaces et-3/0/32 speed 100g
+set interfaces et-3/0/32 mtu 4484
+set interfaces et-3/0/32 ether-options no-flow-control
+set interfaces et-3/0/32 ether-options fec none
+set interfaces et-3/0/32 unit 0 family inet filter input Filter-DDOS-Protect-IN
+set interfaces et-3/0/32 unit 0 family inet filter output Filter-ISP-OUT
+set interfaces et-3/0/32 unit 0 family inet address 144.223.171.102/30
+set interfaces et-3/0/32 unit 0 family inet6 filter input Filter-DDOS-Protect-IN_v6
+set interfaces et-3/0/32 unit 0 family inet6 address 2600:0001:0600:0010::000b/127
+
+set protocols isis interface et-3/0/32.0 level 2 metric 0
+set protocols isis interface et-3/0/32.0 level 2 ipv6-unicast-metric 0
+set protocols isis interface et-3/0/32.0 level 2 passive
+
+set snmp rmon alarm 8761 apply-groups QDrop-Rmon
+set snmp rmon alarm 8761 description et-3/0/32
+set snmp rmon alarm 8761 variable jnxCosQstatTotalDropPkts.761.0
+set snmp rmon alarm 8761 syslog-subtag QDROP_et_3_0_32
+set snmp rmon alarm 9761 apply-groups CRC-Rmon
+set snmp rmon alarm 9761 description et-3/0/32
+set snmp rmon alarm 9761 variable ifJnxInFrameErrors.761
+set snmp rmon alarm 9761 syslog-subtag CRC_et_3_0_32
+
+set class-of-service interfaces et-3/0/32 unit 0 classifiers dscp-ipv6 IN_ISP_IPv6
+set class-of-service interfaces et-3/0/32 unit 0 classifiers inet-precedence IN_ISP_IPv4

@@ -4,6 +4,7 @@ import json
 import os
 import tempfile
 from app.domain import Project, TaskInstance
+from app.inventory.api_repository import API_INVENTORY_SOURCE
 
 MAX_FILE_BYTES = 20 * 1024 * 1024
 
@@ -11,8 +12,7 @@ MAX_FILE_BYTES = 20 * 1024 * 1024
 def save_project(path, project):
     destination = Path(path)
     payload = asdict(project)
-    if project.inventory_source:
-        payload["inventory_source"] = os.path.relpath(Path(project.inventory_source).resolve(), destination.parent.resolve())
+    payload["inventory_source"] = API_INVENTORY_SOURCE
     descriptor, temporary = tempfile.mkstemp(dir=destination.parent, suffix=".tmp")
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as stream:
@@ -54,6 +54,4 @@ def load_project(path):
     project = Project(**data)
     if not isinstance(project.name, str) or not isinstance(project.inventory_source, str):
         raise ValueError("잘못된 프로젝트 메타데이터")
-    if project.inventory_source:
-        project.inventory_source = str((path.parent / project.inventory_source).resolve())
     return project

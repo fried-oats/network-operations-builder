@@ -2,9 +2,9 @@ approved_by: user-provided expected CLI and follow-up clarification in this chat
 model: PTX10008
 os_version: 23.4R2-S1.6-EVO
 interface_type: et
-schema_version: 1.3.0
-profile_version: 1.3.0
-template_version: 1.3.0
+schema_version: 1.4.1
+profile_version: 1.4.1
+template_version: 1.4.1
 notes:
 - Management IP 192.0.2.239 is a documentation-only test Inventory key.
 - 'User 7-request revision: generated Description using Inventory Name and exact speed

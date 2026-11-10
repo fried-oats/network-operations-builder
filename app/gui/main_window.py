@@ -10,6 +10,8 @@ from PySide6.QtWidgets import (
     QMessageBox, QInputDialog, QTextEdit, QAbstractItemView,
 )
 from app.domain import Project, TaskInstance
+from app.api_config import ApiSettings
+from .api_dialog import ApiInventoryDialog
 from app.services.builder import BuilderService
 from app.bulk.io import export_report
 from .fields import SchemaForm
@@ -188,7 +190,8 @@ class MainWindow(QMainWindow):
             ("새 프로젝트", "Ctrl+N", self.new_project), ("열기", "Ctrl+O", self.open_project),
             ("프로젝트 이름 변경", "", self.rename_project),
             ("저장", "Ctrl+S", self.save_project), ("다른 이름으로 저장", "Ctrl+Shift+S", lambda: self.save_project(True)),
-            ("Inventory CSV", "", self.load_inventory), ("Config 내보내기", "", self.export_config),
+            ("API Inventory 불러오기", "", self.load_api_inventory),
+            ("Config 내보내기", "", self.export_config),
             ("오류 보고서", "", self.export_errors),
         ):
             action = QAction(label, self)
@@ -202,7 +205,7 @@ class MainWindow(QMainWindow):
         view.addAction("패널 너비 초기화", lambda: self.splitter.setSizes([330, 645, 525]))
         view.addAction("검증 패널", lambda: self.errors.setVisible(not self.errors.isVisible()))
         help_menu = self.menuBar().addMenu("도움말")
-        help_menu.addAction("버전 / 검증 상태", lambda: QMessageBox.information(self, "MVP v0.1", "Task/Schema/Profile/Template: 1.3.0\nGolden: PTX10008 / 23.4R2-S1.6-EVO / et, unit 0\nIS-IS P2P/passive 및 CoS backbone/external 지원\nae 전체 생성은 추가 Golden 필요\n장비 접속/실행 기능 없음"))
+        help_menu.addAction("버전 / 검증 상태", lambda: QMessageBox.information(self, "MVP v0.1", "Task/Schema/Profile/Template: 1.4.1\nGolden: PTX10008 / 23.4R2-S1.6-EVO / et, unit 0\nLink mode: backbone/external (external: no-flow-control)\nIS-IS P2P/passive 지원\nae 전체 생성은 추가 Golden 필요\n장비 접속/실행 기능 없음"))
 
     def refresh_recent(self):
         self.recent_menu.clear()
@@ -375,7 +378,7 @@ class MainWindow(QMainWindow):
             self.errors.clear()
             for diagnostic in result.diagnostics:
                 self.errors.addItem(f"{diagnostic.instance_id} · {diagnostic.field} · {diagnostic.code}: {diagnostic.message}")
-            self.statusBar().showMessage(f"오류 {len(result.diagnostics)} · 생성 {len(result.valid_instance_ids)} / {len(instances)} · 오프라인")
+            self.statusBar().showMessage(f"오류 {len(result.diagnostics)} · 생성 {len(result.valid_instance_ids)} / {len(instances)} · 로컬 Config 생성")
             self.show_preview()
         self.run_worker(lambda: self.service.engine.generate(instances, inventory, common), done)
 
@@ -435,15 +438,29 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(message)
         QMessageBox.warning(self, "확인 필요", message)
 
-    def load_inventory(self):
-        path = self.choose(False, "Inventory", "CSV (*.csv)")
-        if path:
-            try:
-                self.service.load_inventory(path)
-                self.touch()
-                self.refresh(self.selected)
-            except (OSError, ValueError) as exc:
-                self.error(str(exc))
+    def load_api_inventory(self):
+        try:
+            settings = ApiSettings.load()
+        except (OSError, ValueError) as exc:
+            self.error(str(exc))
+            return
+        dialog = ApiInventoryDialog(settings, self)
+        if dialog.exec() != ApiInventoryDialog.Accepted:
+            dialog.deleteLater()
+            return
+        user_id, password = dialog.take_credentials()
+        dialog.deleteLater()
+        revision = self.revision
+        self.statusBar().showMessage("API에서 라우터 정보를 불러오는 중…")
+        def done(records):
+            if revision != self.revision:
+                self.error("조회하는 동안 프로젝트/입력이 변경되었습니다. API Inventory를 다시 불러오세요.")
+                return
+            self.service.apply_api_inventory(records)
+            self.touch()
+            self.refresh(self.selected)
+            self.statusBar().showMessage(f"API Inventory: 라우터 {len(records)}개 로드 완료")
+        self.run_worker(lambda: self.service.fetch_api_inventory(settings, user_id, password), done)
 
     def template(self, suffix):
         path = self.choose(True, "최신 Bulk 양식", f"{suffix.upper()} (*.{suffix})")

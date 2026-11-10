@@ -2,6 +2,7 @@
 os_family: {'type': 'enum', 'choices': ['Junos'], 'required': True, 'group': 'Target'}
 os_version: {'type': 'string', 'required': True, 'group': 'Target'}
 interface_type: {'type': 'string', 'required': True, 'group': 'Target'}
+link_mode: {'type': 'enum', 'choices': ['backbone', 'external'], 'required': True, 'group': 'Link'}
 local_interface: {'type': 'string', 'required': True, 'group': 'Link', 'capability': 'interface'}
 peer_name: {'type': 'string', 'required': True, 'group': 'Link'}
 peer_interface: {'type': 'string', 'required': True, 'group': 'Link'}
@@ -27,6 +28,5 @@ ldp_enabled: {'type': 'bool', 'group': 'MPLS', 'capability': 'ldp', 'requires': 
 rmon_enabled: {'type': 'bool', 'group': 'RMON', 'capability': 'rmon'}
 ifindex: {'type': 'integer', 'min': 1, 'group': 'RMON', 'visible_when': 'rmon_enabled', 'required_when': 'rmon_enabled'}
 cos_enabled: {'type': 'bool', 'group': 'CoS', 'capability': 'cos'}
-cos_mode: {'type': 'enum', 'choices': ['backbone', 'external'], 'group': 'CoS', 'visible_when': 'cos_enabled'}
 scheduler_map: {'type': 'string', 'group': 'CoS', 'visible_when': 'cos_enabled', 'capability': 'scheduler_map'}
 classifiers: {'type': 'string', 'group': 'CoS', 'visible_when': 'cos_enabled', 'capability': 'classifiers'}

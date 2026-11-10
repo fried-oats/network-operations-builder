@@ -8,7 +8,7 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication, QComboBox
 from app.domain import InventoryRecord, TaskInstance
 from app.engine.core import ConfigEngine
-from app.inventory import CsvInventoryRepository
+from app.inventory.normalization import inventory_record
 from app.services.builder import BuilderService
 from app.gui.main_window import MainWindow
 
@@ -21,20 +21,13 @@ def inputs():
     return TaskInstance(**data["instances"][0]), {row["management_ip"]: InventoryRecord(**row) for row in data["inventory"]}
 
 
-def test_csv_os_metadata_and_legacy_fallback(tmp_path):
-    path = tmp_path / "inventory.csv"
-    def write(vendor, with_version):
-        with path.open("w", encoding="utf-8-sig", newline="") as stream:
-            writer = csv.writer(stream)
-            writer.writerow([*CsvInventoryRepository.headers, *([" os_version "] if with_version else [])])
-            writer.writerow(["192.0.2.1", "R1", "", "", "", "", vendor, "PTX10008", *([" 23.4R2-S1.6-EVO "] if with_version else [])])
-    write("Juniper Networks", True)
-    record = CsvInventoryRepository().load(path)["192.0.2.1"]
+def test_os_metadata_normalization():
+    def record_for(vendor, version):
+        return inventory_record("192.0.2.1", "R1", "", "", "", "", vendor, "PTX10008", version)
+    record = record_for("Juniper Networks", " 23.4R2-S1.6-EVO ")
     assert (record.os_family, record.os_version) == ("Junos", "23.4R2-S1.6-EVO")
-    write("Juniper", False)
-    assert CsvInventoryRepository().load(path)["192.0.2.1"].os_version == ""
-    write("Unknown Vendor", True)
-    assert CsvInventoryRepository().load(path)["192.0.2.1"].os_family == ""
+    assert record_for("Juniper", "").os_version == ""
+    assert record_for("Unknown Vendor", "23.4R2-S1.6-EVO").os_family == ""
 
 
 @pytest.mark.parametrize("circuit", ["00000000-0000", "0000-0000-0000", "Direct", ""])

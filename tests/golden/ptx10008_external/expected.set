@@ -1,6 +1,7 @@
 set interfaces et-1/0/0 description "## GL-PO239(et-1/0/0)-DO-GW203(et-0/0/1)`100g`08882136-0607`NCP` NCP Wet HLS/KT-SEL/KTGE100L03`(NCP Backhaul:OQYX/167426//ZYO)`##"
 set interfaces et-1/0/0 speed 100g
 set interfaces et-1/0/0 mtu 4484
+set interfaces et-1/0/0 ether-options no-flow-control
 set interfaces et-1/0/0 ether-options fec none
 set interfaces et-1/0/0 unit 0 family inet filter input Filter-POM-GATE-IN
 set interfaces et-1/0/0 unit 0 family inet filter output Filter-POM-GATE-OUT
